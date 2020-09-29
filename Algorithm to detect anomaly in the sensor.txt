@@ -1,0 +1,34 @@
+void task_process_sensor_data()
+{   
+    float actualTempValue; //The current value of the temperature in the loop.
+    float lastTempValue = 0; //The value of the temperature read in the iteration (i-1)
+    float actualTempDiff; //The current absulut value of the difference between actualTempValue and lastTempValue in each iteration step.
+    float avg = 0; //The current average of temperarute. It will updated in each interation of the loop
+    float avgDif = 0;// The current average of the difference of temperature between the actual temperature value (actualTempValue) and the last temperature value (lastTempValue); Average of the variaton rate.
+    float avgSum = 0;//The auxiliar cumulative variable to calculate the average (avg)
+    float avgDifSum = 0;//The auxiliar cumulative variable to calculate the average of the variation rate.
+    uint32_t i = 0;//Iteration counter
+    uint16_t learningIterationNumber = 10;// Number of iteration needed by the algorithm to learn the normal behavior of the sensor
+    while(1)
+    {
+        if(xQueueReceive(xQueue_SHT85_DataProcessing, &actualTempValue , 5000 / portTICK_PERIOD_MS)) //Value of temperature sent by the task_read_temp_and_hum();
+        {
+            i++;                        
+            if(lastTempValue == 0) //Initial condition. Need to initialize.
+            {
+                lastTempValue = actualTempValue;
+                avgDifSum = absoluto(actualTempValue - lastTempValue); //Initialize the avgDifSum variable with (actualTempValue - lastTempValue)
+            } 
+            actualTempDiff = absoluto(actualTempValue - lastTempValue);
+            avgSum = avgSum + actualTempValue;
+            avg = avgSum/i;
+            avgDifSum = avgDifSum + actualTempDiff;
+            avgDif = avgDifSum/i;              
+            lastTempValue = actualTempValue; //Update the value of lastTempValue that is gonna be used in the next iteration.
+            ESP_LOGI(TAGDataProcessing, "Avg: %f",avg);
+            ESP_LOGI(TAGDataProcessing, "AvgDif: %f",avgDif);    //Debug steps
+            ESP_LOGI(TAGDataProcessing, "Instant Differece: %f", actualTempDiff);
+            if(actualTempDiff > 2*avgDif && i > learningIterationNumber)  ESP_LOGI(TAGDataProcessing, "WARNING! An anomaly in the increase rate of temperature was detected!"); //Alert the user if any anomaly variation rate was detected after 
+        }
+    }
+}

@@ -1,0 +1,8 @@
+    {"c":0,"l":"tv","s":1,"d":1601343900,"r":0} save_schedule_time(loadName->valuestring, loadState->valueint, date->valueint, repetions->valueint));
+    else if(command == 1) ESP_ERROR_CHECK(print_load_sched_list(loadName->valuestring));
+    {"c":2,"l":"tv","p":15} else if(command == 2) register_new_load(loadName->valuestring, pin->valueint);
+    {"c":2,"l":"air","p":2}
+    {"c":3} else if(command == 3) read_load_list();
+    else if(command == 4) return_sched_from_NVS();
+    else if(command == 5) delete_or_change_sched_from_NVS(loadName->valuestring, date->valueint, _NULL, 0);
+    else if(command == 6) delete_or_change_sched_from_NVS(loadName->valuestring, date->valueint, repetions->valueint, 1);

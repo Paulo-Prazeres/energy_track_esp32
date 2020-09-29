@@ -1,0 +1,29 @@
+while(1)
+    {
+        get_string(line, sizeof(line));
+        sscanf(line, "%s %d %d %d", pattern, &repeat, &expected_published, &qos_test);
+        ESP_LOGI(TAG2, "PATTERN:%s REPEATED:%d PUBLISHED:%d\n", pattern, repeat, expected_published);
+        int pattern_size = strlen(pattern);
+        free(expected_data);
+        free(actual_data);
+        actual_published = 0;
+        expected_size = pattern_size * repeat;
+        expected_data = malloc(expected_size);
+        actual_data = malloc(expected_size);
+        for (int i = 0; i < repeat; i++) {
+            memcpy(expected_data + i * pattern_size, pattern, pattern_size);
+        }
+        printf("EXPECTED STRING %.*s, SIZE:%d\n", expected_size, expected_data, expected_size);
+        esp_mqtt_client_stop(client);
+
+        xEventGroupClearBits(mqtt_event_group, CONNECTED_BIT);//publish_test.c
+        esp_mqtt_client_start(client);
+        ESP_LOGI(TAG2, "Note free memory: %d bytes", esp_get_free_heap_size());
+        xEventGroupWaitBits(mqtt_event_group, CONNECTED_BIT, false, true, portMAX_DELAY);//publish_test.c
+
+        for (int i = 0; i < expected_published; i++) {
+            int msg_id = esp_mqtt_client_publish(client, "/topic/paulesp32qos0", expected_data, expected_size, qos_test, 0);
+            ESP_LOGI(TAG2, "[%d] Publishing...", msg_id);
+        }
+
+    }

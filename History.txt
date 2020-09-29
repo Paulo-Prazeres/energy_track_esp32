@@ -1,0 +1,2 @@
+02/08/2020: Display ligado causa probelmas no barramento I2C e o sensor não consegue ser lido;
+Tentativa de solução: Resetar o display no momento que em que o sensor for lido. Analisar estratégias de reinicializar o display a cada valor lido.
